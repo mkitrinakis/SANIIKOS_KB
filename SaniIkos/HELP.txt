@@ -1,0 +1,9 @@
+﻿
+$certname = "SPOSchedule.cyta.com.cy"  
+$cert = New-SelfSignedCertificate -Subject "CN=$certname" -CertStoreLocation "Cert:\CurrentUser\My" -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256
+
+Export-Certificate -Cert $cert -FilePath "C:\Certs\$certname.cer"   
+
+$mypwd = ConvertTo-SecureString -String "abc1234!" -Force -AsPlainText  
+
+Export-PfxCertificate -Cert $cert -FilePath "C:\Certs\$certname.pfx" -Password $mypwd   ## Specify your preferred location
