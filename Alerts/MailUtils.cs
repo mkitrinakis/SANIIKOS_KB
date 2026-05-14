@@ -40,7 +40,7 @@ namespace Alerts
         //const string tenantID = "5f5b00f6-41ee-4bd1-8944-9cb3b1e3fef2";
         //const string certificationPath = "C:\\Certs\\KBSchedule.lbriresorts.eu.pfx";
         //const string certificationPassword = "lbri_123!2";
-         string mailFrom = "sa_intt_sadm@lbriresorts.eu"; 
+        string mailFrom = Utils.getMailFrom(); 
 
         public  void sendMail(string subject, string body, string recipient)
         {

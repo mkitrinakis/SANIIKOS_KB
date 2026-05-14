@@ -10,11 +10,14 @@ using System.Configuration;
 
 namespace Alerts
 {
+    
+
     internal static class Utils
     {
         public static string baseUrl = "https://lbriresorts.sharepoint.com";
         public static string contentUploadSiteUrl = "https://lbriresorts.sharepoint.com/sites/KB-ContentUpload/";
         public static string[] getSiteUrls() { return ConfigurationManager.AppSettings["SiteCollections"].Split(';'); }
+        public static string getMailFrom() { return ConfigurationManager.AppSettings["MailFrom"]; }
         public static string getAdminEmail() { return ConfigurationManager.AppSettings["AdminEmail"];}
         public static string getAdminEmailSubject() { return ConfigurationManager.AppSettings["AdminEmailSubject"]; }
         public static string getCertificationPassword() { return ConfigurationManager.AppSettings["CertificationPassword"]; }
@@ -28,6 +31,14 @@ namespace Alerts
                 return Convert.ToInt32(ConfigurationManager.AppSettings["ThreshHoldDays"]);
             }
             catch { return 30; }
+        }
+        public static int getThreshholdDaysEscalate()
+        {
+            try
+            {
+                return Convert.ToInt32(ConfigurationManager.AppSettings["ThreshHoldDaysEscalate"]);
+            }
+            catch { return 10; }
         }
 
         public static bool  getProductionMode() {
@@ -79,7 +90,7 @@ namespace Alerts
             UserCollection users = publishersGroup.Users;
             ctx.Load(users);
             ctx.ExecuteQuery();
-            Console.WriteLine($"Group: {publishersGroup.Title}");
+           // Console.WriteLine($"Group: {publishersGroup.Title}");
             return String.Join(";", users.Select(x => (x.Email ?? "")).ToList<string>());
         }
     }
