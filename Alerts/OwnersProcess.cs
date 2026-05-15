@@ -32,6 +32,13 @@ namespace Alerts
             AuthenticationManager authManager = AuthenticationManager.CreateWithCertificate(Utils.getClientID(), Utils.getCertificationPath(), Utils.getCertificationPassword(), Utils.getTenantID());
             runForRole(authManager, false); // for Owners 
             runForRole(authManager, true); // escalate to LibraryAdmins 
+            if (allErrors.Count > 0 && (!String.IsNullOrEmpty(allErrors[0])))
+            {
+                string body = String.Join("<br/>" + Environment.NewLine, allErrors);
+                MailUtils mailUtils = new MailUtils();
+                mailUtils.sendMail(Utils.getAdminEmailSubject(), body, Utils.getAdminEmail());
+                SaveEmailToSharePoint(authManager, Utils.getAdminEmail(), Utils.getAdminEmailSubject(), body);
+            }
         }
 
         public void runForRole(AuthenticationManager authManager,  bool escalate) {
@@ -79,13 +86,7 @@ namespace Alerts
                 allErrors.Add(errMsg);
             }
 
-            if (allErrors.Count > 0 && (!String.IsNullOrEmpty(allErrors[0])))
-            {
-                string body = String.Join(Environment.NewLine, allErrors);
-
-                MailUtils mailUtils = new MailUtils();
-                mailUtils.sendMail(Utils.getAdminEmailSubject(), body, Utils.getAdminEmail());
-            }
+          
 
 
             Console.WriteLine("Alerts completed on:" + System.DateTime.Now.ToString());
@@ -222,11 +223,11 @@ namespace Alerts
                         body.AppendLine("<br/>");
                         if (escalate)
                         {
-                            body.AppendLine("This is a weekly automatic email informing for all documents (of the KB-libraries you are admin) assigned to owners with an Expiration Date not further than " + Utils.getThreshholdDaysEscalate() + " days  from now. Alerts are also sent to owners on a weekly basis for all documents with Expiration Date not further than " + Utils.getThreshholdDays() +  " days from now. <br/> Please <b>do not reply</b> to this email.");
+                            body.AppendLine("This is an automated notification regarding all documents within the KB-libraries you are administrator,and that are assigned to owners with an expiration date falling within " + Utils.getThreshholdDaysEscalate() + " days from today. In addition, document owners receive notifications for all documents with an expiration date falling within " + Utils.getThreshholdDays() +  " days from today. <br/> Please note that this is an automated message.Kindly <b>do not reply</b> this message.");
                         }
                         else
                         {
-                            body.AppendLine("This is a weekly automatic email informing for all documents assigned to the recipient (document's owner) with an Expiration Date not further than " + Utils.getThreshholdDays() + " days  from now. <br/> Please <b>do not reply</b> to this email.");
+                            body.AppendLine("This is an automated notification regarding all KB-libraries' documents you are assigned as 'Owner' with an expiration date falling within " + Utils.getThreshholdDays() + " days  from now.  <br/> Please note that this is an automated message.Kindly <b>do not reply</b> this message.");
                         }
                         //var emailProps = new EmailProperties
                         //{
@@ -236,11 +237,15 @@ namespace Alerts
                         //};
                         Console.WriteLine(" to log email:  " + body);
                         SaveEmailToSharePoint(authManager, receivers, subject, body.ToString());
-                        if (Utils.getProductionMode())
+                        if (Utils.getProductionMode() && !String.IsNullOrEmpty(receivers))
                         {
                             MailUtils mailUtils = new MailUtils();
                             mailUtils.sendMail(subject, body.ToString(), receivers); 
                             //mailUtils.sendMail(subject, body.ToString(), "mkitrinakis@inttrust.gr;markos.kitrinakis@gmail.com");
+                        }
+                        if (String.IsNullOrEmpty(receivers))
+                        {
+                            allErrors.Add("No recipients to send Alert mail (with subject:" + subject + " )"); 
                         }
                     }
                 }
